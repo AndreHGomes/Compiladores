@@ -54,6 +54,8 @@ chars [a-zA-Z]
 "FALSE"					{return OP_FALSE;}
 	
 "ret"					{return RETORNO;}
+"length"				{return OP_TAMANHO;}
+"concat"				{return OP_CONCATENACAO;}
 
 %%
 
