@@ -38,4 +38,27 @@ extern void yyerror(const char* s, ...);
 
 %%
 
+program : blocks {programRoot = $1; }
+        ;
+        
+blocks  : block { $$ = new AST::Block(); if($1 != NULL) $$->lines.push_back($1); }
+        | blocks block { if($2 != NULL) $1->lines.push_back($2); }
+        ;
 
+block   : decl END      {$$ = $1;}
+        | assign END    
+        | error END     {yyerrok; $$ = NULL;}
+        ;
+
+expr    : term              /*just copies the Node*/
+        | expr COMP expr { $$ = new AST::BinOp($1->coerce($3), $2, $3->coerce($1)); }
+        | expr OP_PLUS expr { $$ = new AST::BinOp($1->coerce($3), Ops::plus, $3->coerce($1)); }
+        | expr OP_TIMES expr { $$ = new AST::BinOp($1->coerce($3), Ops::times, $3->coerce($1)); }
+        | expr OP_DIV expr { $$ = new AST::BinOp($1->coerce($3), Ops::div, $3->coerce($1)); }
+        | expr OP_MINUS expr { $$ = new AST::BinOp($1->coerce($3), Ops::minus, $3->coerce($1)); }
+        | expr OP_AND expr { $$ = new AST::BinOp($1, Ops::andOp, $3); }
+        | expr OP_OR expr { $$ = new AST::BinOp($1, Ops::orOp, $3); }
+        | OP_NOT expr { $$ = new AST::UnOp($2, Ops::notOp); }
+        | OP_MINUS expr %prec OP_MIN_UN { $$ = new AST::UnOp($2, Ops::uMinus); }
+        | PAR_OP expr PAR_CL { $$ = new AST::UnOp($2, Ops::par); }
+        ;
