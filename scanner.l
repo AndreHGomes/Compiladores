@@ -13,10 +13,14 @@ chars [a-zA-Z]
 
 %%
 
-[ \t\n]		; //ignora espacos
+[ \t\n]					; //ignora espacos
 
 {digs}+					{yylval.name = strdup(yytext); return INTEIRO;}
 "\'"."\'"				{yylval._char = yytext[1]; return CARACTER;}
+
+"\""."\""				{yylval = atoi (yytext); return STRING;} // olhar aqui
+
+{digs}.{digs}+				{yylval.name = strdup(yytext); return DOUBLE;} //definir 0 como default depois do ponto
 "<"					{return COMECA_DEFINICAO;}
 ">"					{return TERMINA_DEFINICAO;}
 {chars}({chars}|{digs})*		{yylval._string = new string(yytext); return IDENTIFICADOR;}
